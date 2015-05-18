@@ -1,5 +1,7 @@
 package pac.app.awesomeweather.utils.yandex_parser.models
 
+import org.jetbrains.anko.db.MapRowParser
+import pac.app.awesomeweather.utils.ForecastTable
 import java.util.Date
 
 val DAY_TYPE_MORNING = 1
@@ -34,4 +36,17 @@ data class ForecastItem(var id: Long = 0,
 
             return ""
         }
+
+    companion object ForecastItemParser: MapRowParser<ForecastItem> {
+        override fun parseRow(columns: Map<String, Any>): ForecastItem {
+            return ForecastItem(columns[ForecastTable.Column.ID] as? Long ?: 0,
+                                columns[ForecastTable.Column.TYPE] as? Int ?: 0,
+                                (columns[ForecastTable.Column.TEMPERATURE_FROM] as? Long)?.toInt() ?: Int.MIN_VALUE,
+                                (columns[ForecastTable.Column.TEMPERATURE_TO] as? Long)?.toInt() ?: Int.MIN_VALUE,
+                                (columns[ForecastTable.Column.TEMPERATURE] as? Long)?.toInt() ?: Int.MIN_VALUE,
+                                columns[ForecastTable.Column.IMAGE] as? String ?: "",
+                                columns[ForecastTable.Column.WEATHER_TYPE] as? String ?: "",
+                                Date(columns[ForecastTable.Column.DATE] as? Long ?: 0))
+        }
+    }
 }

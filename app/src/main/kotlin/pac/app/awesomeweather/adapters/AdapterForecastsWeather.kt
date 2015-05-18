@@ -9,6 +9,9 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import com.squareup.picasso.Picasso
+import org.jetbrains.anko.find
+import org.jetbrains.anko.layoutInflater
+import org.jetbrains.anko.text
 import pac.app.awesomeweather.R
 import pac.app.awesomeweather.adapters.wrappers.ForecastWrapper
 import java.util.ArrayList
@@ -16,11 +19,8 @@ import java.util.ArrayList
 class AdapterForecastsWeather(var context: Context): BaseAdapter() {
 
     private val data: ArrayList<ForecastWrapper>
-    private val layoutInflater: LayoutInflater?
 
     init {
-        layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as? LayoutInflater
-
         data = ArrayList<ForecastWrapper>()
     }
 
@@ -45,19 +45,19 @@ class AdapterForecastsWeather(var context: Context): BaseAdapter() {
         if (convertView == null) {
             holder = ViewHolder()
 
-            rootViewItem = layoutInflater?.inflate(R.layout.forecast_weather_item, null)
+            rootViewItem = context.layoutInflater.inflate(R.layout.forecast_weather_item, null)
 
-            holder?.ivWeatherIcon = rootViewItem?.findViewById(R.id.iv_weather_icon) as? ImageView
-            holder?.tvTemperature = rootViewItem?.findViewById(R.id.tv_temperature) as? TextView
-            holder?.tvWeatherType = rootViewItem?.findViewById(R.id.tv_weather_type) as? TextView
-            holder?.tvPartDay = rootViewItem?.findViewById(R.id.tv_part_day) as? TextView
+            holder?.ivWeatherIcon = rootViewItem?.find<ImageView>(R.id.iv_weather_icon)
+            holder?.tvTemperature = rootViewItem?.find<TextView>(R.id.tv_temperature)
+            holder?.tvWeatherType = rootViewItem?.find<TextView>(R.id.tv_weather_type)
+            holder?.tvPartDay = rootViewItem?.find<TextView>(R.id.tv_part_day)
 
             convertView?.setTag(holder)
         } else {
             holder = convertView.getTag() as? ViewHolder
         }
 
-        holder?.tvPartDay?.setText(item.partDay)
+        holder?.tvPartDay?.text = item.partDay
 
         if (item.image.isNotEmpty()) {
             Picasso.with(context)
@@ -66,8 +66,8 @@ class AdapterForecastsWeather(var context: Context): BaseAdapter() {
                     .into(holder?.ivWeatherIcon)
         }
 
-        holder?.tvTemperature?.setText(item.temperature)
-        holder?.tvWeatherType?.setText(item.weatherType)
+        holder?.tvTemperature?.text = item.temperature
+        holder?.tvWeatherType?.text = item.weatherType
 
         return rootViewItem
     }

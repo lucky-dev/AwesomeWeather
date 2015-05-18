@@ -13,6 +13,7 @@ import pac.app.awesomeweather.adapters.AdapterForecastsWeather
 import pac.app.awesomeweather.adapters.wrappers.ForecastWrapper
 import pac.app.awesomeweather.utils.WeatherDatabase
 import pac.app.awesomeweather.utils.WeatherService
+import pac.app.awesomeweather.utils.database
 import pac.app.awesomeweather.utils.yandex_parser.models.DAY_TYPE_DAY
 import pac.app.awesomeweather.utils.yandex_parser.models.DAY_TYPE_EVENING
 import pac.app.awesomeweather.utils.yandex_parser.models.DAY_TYPE_MORNING
@@ -22,7 +23,6 @@ public class DetailsCurrentWeather : ListFragment() {
 
     private val TAG = "DetailsCurrentWeather"
 
-    private var db: WeatherDatabase? = null
     private var arrayAdapter: AdapterForecastsWeather? = null
     private var dateWeather: Long? = null
 
@@ -50,9 +50,7 @@ public class DetailsCurrentWeather : ListFragment() {
     override fun onStart() {
         super.onStart()
 
-        db = WeatherDatabase.getInstance(getActivity().getApplicationContext())
-
-        db?.getForecastByDay(dateWeather!!) { result ->
+        database.getForecastByDay(dateWeather!!) { result ->
             arrayAdapter?.clear()
 
             result.forEach { item ->

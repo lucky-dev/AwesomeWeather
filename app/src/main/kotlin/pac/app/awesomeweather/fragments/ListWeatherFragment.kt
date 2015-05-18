@@ -14,17 +14,14 @@ import android.widget.ListView
 
 import pac.app.awesomeweather.R
 import pac.app.awesomeweather.activities.DetailsWeatherActivity
-import pac.app.awesomeweather.utils.WeatherDatabase
-import pac.app.awesomeweather.utils.WeatherService
-import pac.app.awesomeweather.utils.isLoadingData
-import pac.app.awesomeweather.utils.isNeedToUpdate
+import pac.app.awesomeweather.utils.*
 import java.text.SimpleDateFormat
 import java.util.Date
 
 public class ListWeatherFragment : ListFragment() {
 
-    private var db: WeatherDatabase? = null
     private var arrayAdapter: ArrayAdapter<DateModel>? = null
+    private var listener: ListWeatherFragmentListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +29,8 @@ public class ListWeatherFragment : ListFragment() {
 
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)
+
+        listener = activity as? ListWeatherFragmentListener
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -42,8 +41,6 @@ public class ListWeatherFragment : ListFragment() {
 
         arrayAdapter = ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1)
         getListView().setAdapter(arrayAdapter)
-
-        db = WeatherDatabase.getInstance(getActivity().getApplicationContext())
     }
 
     override fun onStart() {
@@ -57,7 +54,7 @@ public class ListWeatherFragment : ListFragment() {
         if (isLoadingData(getActivity())) {
             setListShownNoAnimation(false)
         } else {
-            db?.getDaysYandexForecast { result ->
+            database.getDaysYandexForecast { result ->
                 arrayAdapter?.clear()
 
                 result.forEach {
@@ -75,6 +72,8 @@ public class ListWeatherFragment : ListFragment() {
 
     override fun onDetach() {
         super.onDetach()
+
+        listener = null
     }
 
     override fun onListItemClick(l: ListView?, v: View?, position: Int, id: Long) {
@@ -82,9 +81,7 @@ public class ListWeatherFragment : ListFragment() {
 
         val dateModel = arrayAdapter?.getItem(position)
 
-        val intent = Intent(getActivity(), javaClass<DetailsWeatherActivity>())
-        intent.putExtra(DetailsWeatherActivity.DATE_WEATHER, dateModel!!.dateInMs)
-        getActivity().startActivity(intent)
+        listener?.clickOnDate(dateModel!!.dateInMs)
     }
 
     private val apiResponseReceiver = object: BroadcastReceiver() {
@@ -99,7 +96,7 @@ public class ListWeatherFragment : ListFragment() {
                 arrayAdapter?.clear()
 
                 if (response == WeatherService.RESPONSE_VALUE_CODE_OK) {
-                    db?.getDaysYandexForecast { result ->
+                    database.getDaysYandexForecast { result ->
                         result.forEach {
                             arrayAdapter?.add(DateModel(it))
                         }
@@ -121,6 +118,10 @@ public class ListWeatherFragment : ListFragment() {
         override fun toString(): String {
             return strDate
         }
+    }
+
+    trait ListWeatherFragmentListener {
+        fun clickOnDate(date: Long)
     }
 
 }

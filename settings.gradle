@@ -1,1 +1,3 @@
 include ':app'
+include 'anko-21s'
+project(':anko-21s').projectDir = new File("app/libs/anko-21s")

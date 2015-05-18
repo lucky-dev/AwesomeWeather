@@ -12,20 +12,23 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.view.MenuItemCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import android.widget.Toast
+import org.jetbrains.anko.find
+import org.jetbrains.anko.startActivity
 import pac.app.awesomeweather.R
 import pac.app.awesomeweather.YANDEX_WEATHER
 import pac.app.awesomeweather.fragments.CurrentWeatherFragment
+import pac.app.awesomeweather.fragments.ListWeatherFragment
 import pac.app.awesomeweather.utils.WeatherService
 import pac.app.awesomeweather.utils.isLoadingData
 import pac.app.awesomeweather.utils.isNeedToUpdate
 
-public class MainActivity : ActionBarActivity() {
+public class MainActivity : AppCompatActivity(), ListWeatherFragment.ListWeatherFragmentListener {
 
     private var drawerLayout: DrawerLayout? = null
     private var drawerToggle: ActionBarDrawerToggle? = null
@@ -34,7 +37,7 @@ public class MainActivity : ActionBarActivity() {
     private var optionsMenu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super<AppCompatActivity>.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val resourcesWeather = getResources().getStringArray(R.array.resources_weather)
@@ -43,7 +46,7 @@ public class MainActivity : ActionBarActivity() {
         getSupportActionBar().setHomeButtonEnabled(true)
         getSupportActionBar().setTitle(resourcesWeather.get(0))
 
-        drawerLayout = findViewById(R.id.drawer_layout) as? DrawerLayout
+        drawerLayout = find<DrawerLayout>(R.id.drawer_layout)
         drawerToggle = object: ActionBarDrawerToggle(this,
                                                     drawerLayout,
                                                     R.string.drawer_open,
@@ -61,16 +64,16 @@ public class MainActivity : ActionBarActivity() {
 
         drawerLayout?.setDrawerListener(drawerToggle)
 
-        lvListResources = findViewById(R.id.lv_list_resources) as? ListView
+        lvListResources = find<ListView>(R.id.lv_list_resources)
 
         lvListResources?.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, resourcesWeather))
-        lvListResources?.setOnItemClickListener { (adapterView, view, i, l) -> drawerLayout?.closeDrawer(lvListResources) }
+        lvListResources?.setOnItemClickListener { adapterView, view, i, l -> drawerLayout?.closeDrawer(lvListResources) }
 
         currentWeatherFragment = getSupportFragmentManager().findFragmentById(R.id.current_weather_fragment) as? CurrentWeatherFragment
     }
 
     override fun onStart() {
-        super.onStart()
+        super<AppCompatActivity>.onStart()
 
         val intentFilter = IntentFilter()
         intentFilter.addAction(WeatherService.ACTION_START_UPDATING)
@@ -83,7 +86,7 @@ public class MainActivity : ActionBarActivity() {
     }
 
     override fun onStop() {
-        super.onStop()
+        super<AppCompatActivity>.onStop()
 
         LocalBroadcastManager.getInstance(this).unregisterReceiver(apiResponseReceiver)
     }
@@ -102,7 +105,7 @@ public class MainActivity : ActionBarActivity() {
 
         setRefreshMenuItem(isLoadingData(this))
 
-        return super.onPrepareOptionsMenu(menu)
+        return super<AppCompatActivity>.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -116,7 +119,7 @@ public class MainActivity : ActionBarActivity() {
             }
         }
 
-        return super.onOptionsItemSelected(item)
+        return super<AppCompatActivity>.onOptionsItemSelected(item)
     }
 
     private fun setRefreshMenuItem(refreshing: Boolean) {
@@ -132,15 +135,19 @@ public class MainActivity : ActionBarActivity() {
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState);
+        super<AppCompatActivity>.onPostCreate(savedInstanceState);
 
         drawerToggle?.syncState();
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig);
+        super<AppCompatActivity>.onConfigurationChanged(newConfig)
 
-        drawerToggle?.onConfigurationChanged(newConfig);
+        drawerToggle?.onConfigurationChanged(newConfig)
+    }
+
+    override fun clickOnDate(date: Long) {
+        startActivity<DetailsWeatherActivity>(DetailsWeatherActivity.DATE_WEATHER to date)
     }
 
     private val apiResponseReceiver = object: BroadcastReceiver() {
@@ -152,5 +159,4 @@ public class MainActivity : ActionBarActivity() {
             }
         }
     }
-
 }

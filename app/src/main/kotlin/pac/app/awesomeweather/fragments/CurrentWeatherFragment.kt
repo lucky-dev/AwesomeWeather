@@ -15,11 +15,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.squareup.picasso.Picasso
+import org.jetbrains.anko.find
+import org.jetbrains.anko.longToast
+import org.jetbrains.anko.text
 import pac.app.awesomeweather.R
-import pac.app.awesomeweather.utils.WeatherService
-import pac.app.awesomeweather.utils.WeatherDatabase
-import pac.app.awesomeweather.utils.isLoadingData
-import pac.app.awesomeweather.utils.isNeedToUpdate
+import pac.app.awesomeweather.utils.*
 
 public class CurrentWeatherFragment : Fragment() {
 
@@ -31,7 +31,6 @@ public class CurrentWeatherFragment : Fragment() {
     private var tvWeatherType: TextView? = null
     private var rlLoadingData: RelativeLayout? = null
     private var tvNoData: TextView? = null
-    private var db: WeatherDatabase? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,12 +40,12 @@ public class CurrentWeatherFragment : Fragment() {
         // Inflate the layout for this fragment
         val flRoot = inflater.inflate(R.layout.fragment_current_weather, container, false)
 
-        llCurrentWeather = flRoot.findViewById(R.id.ll_current_weather) as? LinearLayout
-        ivWeatherIcon = flRoot.findViewById(R.id.iv_weather_icon) as? ImageView
-        tvTemperature = flRoot.findViewById(R.id.tv_temperature) as? TextView
-        tvWeatherType = flRoot.findViewById(R.id.tv_weather_type) as? TextView
-        rlLoadingData = flRoot.findViewById(R.id.rl_loading_data) as? RelativeLayout
-        tvNoData = flRoot.findViewById(R.id.tv_no_data) as? TextView
+        llCurrentWeather = flRoot.find<LinearLayout>(R.id.ll_current_weather)
+        ivWeatherIcon = flRoot.find<ImageView>(R.id.iv_weather_icon)
+        tvTemperature = flRoot.find<TextView>(R.id.tv_temperature)
+        tvWeatherType = flRoot.find<TextView>(R.id.tv_weather_type)
+        rlLoadingData = flRoot.find<RelativeLayout>(R.id.rl_loading_data)
+        tvNoData = flRoot.find<TextView>(R.id.tv_no_data)
 
         return flRoot
     }
@@ -55,8 +54,6 @@ public class CurrentWeatherFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         showAnimationLoadingData(false)
-
-        db = WeatherDatabase.getInstance(getActivity().getApplicationContext())
     }
 
     override fun onStart() {
@@ -81,18 +78,18 @@ public class CurrentWeatherFragment : Fragment() {
     }
 
     private fun updateWeather() {
-        db?.getCurrentYandexForecast { item ->
+        database.getCurrentYandexForecast { item ->
             Log.d(TAG, "Current weather: $item")
 
-            if (item.image.isNotEmpty()) {
+            if (item?.image.isNotEmpty()) {
                 Picasso.with(getActivity())
-                        .load(item.image)
+                        .load(item?.image)
                         .fit()
                         .into(ivWeatherIcon)
             }
 
-            tvTemperature?.setText(item.strTemperature)
-            tvWeatherType?.setText(item.weatherType)
+            tvTemperature?.text = item?.strTemperature ?: ""
+            tvWeatherType?.text = item?.weatherType ?: ""
         }
     }
 
@@ -122,7 +119,7 @@ public class CurrentWeatherFragment : Fragment() {
                 } else {
                     showLabelNoData(true)
 
-                    Toast.makeText(getActivity(), getString(R.string.error_message), Toast.LENGTH_LONG).show()
+                    longToast(getString(R.string.error_message))
                 }
             }
         }

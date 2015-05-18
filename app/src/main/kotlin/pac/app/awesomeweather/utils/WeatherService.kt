@@ -13,16 +13,14 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.UnknownHostException
+import org.jetbrains.anko.startService
 
 public class WeatherService : IntentService("WeatherService") {
 
     private val TAG = "WeatherService"
 
-    private var db: WeatherDatabase? = null
-
     override fun onCreate() {
         super.onCreate()
-        db = WeatherDatabase.getInstance(this)
     }
 
     override fun onHandleIntent(intent: Intent?) {
@@ -47,8 +45,8 @@ public class WeatherService : IntentService("WeatherService") {
                     val listForecasts = coreParser.parse(xmlData)
 
                     if (listForecasts.isNotEmpty()) {
-                        db?.clearYandexWeather()
-                        listForecasts.forEach { db?.saveYandexForecast(it) }
+                        database.clearYandexWeather()
+                        listForecasts.forEach { database.saveYandexForecast(it) }
                     }
 
                     intent.putExtra(RESPONSE_PARAM_CODE, RESPONSE_VALUE_CODE_OK)
@@ -90,9 +88,7 @@ public class WeatherService : IntentService("WeatherService") {
         val ACTION_STOP_UPDATING = "pac.app.awesomeweather.ACTION_STOP_UPDATING"
 
         fun downloadNews(context: Context, weatherResource: Int) {
-            val intent = Intent(context, javaClass<WeatherService>())
-            intent.putExtra(REQUEST_PARAM_WEATHER_RESOURCE, weatherResource)
-            context.startService(intent)
+            context.startService<WeatherService>(REQUEST_PARAM_WEATHER_RESOURCE to weatherResource)
         }
     }
 
