@@ -17,7 +17,9 @@
 package org.jetbrains.anko.db
 
 import android.database.Cursor
+import android.database.sqlite.SQLiteCursor
 import android.database.sqlite.SQLiteException
+import android.os.Build
 import java.util.ArrayList
 import java.lang.reflect.Modifier
 import org.jetbrains.anko.AnkoException
@@ -155,16 +157,53 @@ public inline fun <reified T> classParser(): RowParser<T> {
     }
 }
 
+private val FIELD_TYPE_INTEGER = 1
+private val FIELD_TYPE_FLOAT = 2
+private val FIELD_TYPE_STRING = 3
+private val FIELD_TYPE_BLOB = 4
+
+private fun getType(cursor: Cursor, columnIndex: Int): Int {
+    val cursorWindow = (cursor as? SQLiteCursor)?.getWindow()
+    if (cursorWindow == null) {
+        return 0
+    }
+
+    val position = cursor.getPosition()
+
+    if (cursorWindow.isLong(position, columnIndex)) {
+        return FIELD_TYPE_INTEGER
+    } else if (cursorWindow.isFloat(position, columnIndex)) {
+        return FIELD_TYPE_FLOAT
+    } else if (cursorWindow.isString(position, columnIndex)) {
+        return FIELD_TYPE_STRING
+    } else if (cursorWindow.isBlob(position, columnIndex)) {
+        return FIELD_TYPE_BLOB
+    } else {
+        return 0
+    }
+}
+
 private fun readColumnsArray(cursor: Cursor): Array<Any> {
     val count = cursor.getColumnCount()
     val arr = arrayOfNulls<Any>(count)
     for (i in 0..(count - 1)) {
-        arr[i] = when (cursor.getType(i)) {
-            Cursor.FIELD_TYPE_INTEGER -> cursor.getLong(i)
-            Cursor.FIELD_TYPE_FLOAT -> cursor.getDouble(i)
-            Cursor.FIELD_TYPE_STRING -> cursor.getString(i)
-            Cursor.FIELD_TYPE_BLOB -> cursor.getBlob(i)
-            else -> Unit
+        // Hack for API pre-HONEYCOMB. API v11 is HONEYCOMB
+        if (Build.VERSION.SDK_INT >= 11) {
+            arr[i] = when (cursor.getType(i)) {
+                Cursor.FIELD_TYPE_INTEGER -> cursor.getLong(i)
+                Cursor.FIELD_TYPE_FLOAT -> cursor.getDouble(i)
+                Cursor.FIELD_TYPE_STRING -> cursor.getString(i)
+                Cursor.FIELD_TYPE_BLOB -> cursor.getBlob(i)
+                else -> Unit
+            }
+        } else {
+            arr[i] = when (getType(cursor, i)) {
+                FIELD_TYPE_INTEGER -> cursor.getLong(i)
+                FIELD_TYPE_FLOAT -> cursor.getDouble(i)
+                FIELD_TYPE_STRING -> cursor.getString(i)
+                FIELD_TYPE_BLOB -> cursor.getBlob(i)
+                else -> Unit
+            }
         }
     }
     [suppress("CAST_NEVER_SUCCEEDS")]
@@ -175,13 +214,24 @@ private fun readColumnsMap(cursor: Cursor): Map<String, Any> {
     val count = cursor.getColumnCount()
     val map = hashMapOf<String, Any>()
     for (i in 0..(count - 1)) {
-        map.put(cursor.getColumnName(i), when (cursor.getType(i)) {
-            Cursor.FIELD_TYPE_INTEGER -> cursor.getLong(i)
-            Cursor.FIELD_TYPE_FLOAT -> cursor.getDouble(i)
-            Cursor.FIELD_TYPE_STRING -> cursor.getString(i)
-            Cursor.FIELD_TYPE_BLOB -> cursor.getBlob(i)
-            else -> Unit
-        })
+        // Hack for API pre-HONEYCOMB. API v11 is HONEYCOMB
+        if (Build.VERSION.SDK_INT >= 11) {
+            map.put(cursor.getColumnName(i), when (cursor.getType(i)) {
+                Cursor.FIELD_TYPE_INTEGER -> cursor.getLong(i)
+                Cursor.FIELD_TYPE_FLOAT -> cursor.getDouble(i)
+                Cursor.FIELD_TYPE_STRING -> cursor.getString(i)
+                Cursor.FIELD_TYPE_BLOB -> cursor.getBlob(i)
+                else -> Unit
+            })
+        } else {
+            map.put(cursor.getColumnName(i), when (getType(cursor, i)) {
+                FIELD_TYPE_INTEGER -> cursor.getLong(i)
+                FIELD_TYPE_FLOAT -> cursor.getDouble(i)
+                FIELD_TYPE_STRING -> cursor.getString(i)
+                FIELD_TYPE_BLOB -> cursor.getBlob(i)
+                else -> Unit
+            })
+        }
     }
     return map
 }
