@@ -119,7 +119,7 @@ public class WeatherDatabase(var context: Context): ManagedSQLiteOpenHelper(cont
     override fun onCreate(db: SQLiteDatabase) {
         db.transaction {
             createTable(ForecastTable.NAME, false,
-                        ForecastTable.Column.ID to INTEGER + PRIMARY_KEY + AUTOINCREMENT,
+                        ForecastTable.Column.ID to INTEGER + PRIMARY_KEY,
                         ForecastTable.Column.TYPE to INTEGER,
                         ForecastTable.Column.TEMPERATURE_FROM to INTEGER,
                         ForecastTable.Column.TEMPERATURE_TO to INTEGER,
