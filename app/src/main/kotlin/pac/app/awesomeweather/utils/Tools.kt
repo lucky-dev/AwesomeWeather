@@ -13,7 +13,7 @@ fun setUpdatedTime(context: Context) {
     editor.commit()
 }
 
-public fun isNeedToUpdate(context: Context): Boolean {
+fun isNeedToUpdate(context: Context): Boolean {
     val settings = context.getSharedPreferences(PREFS_NAME, 0)
 
     val updatedAt = settings.getLong("weather_updated_at", 0)
@@ -22,17 +22,4 @@ public fun isNeedToUpdate(context: Context): Boolean {
     val halfHour = 1800000 // 30 min
 
     return diffTime > halfHour
-}
-
-fun setLoadingData(context: Context, flag: Boolean) {
-    val settings = context.getSharedPreferences(PREFS_NAME, 0)
-    val editor = settings.edit()
-    editor.putBoolean("loading_data", flag)
-    editor.commit()
-}
-
-fun isLoadingData(context: Context): Boolean {
-    val settings = context.getSharedPreferences(PREFS_NAME, 0)
-
-    return settings.getBoolean("loading_data", false)
 }

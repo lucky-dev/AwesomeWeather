@@ -88,6 +88,7 @@ public class WeatherDatabase(var context: Context): ManagedSQLiteOpenHelper(cont
             use {
                 select(ForecastTable.NAME)
                         .where("${ForecastTable.Column.DATE} = {dateInMs}", "dateInMs" to dateInMs)
+                        .orderBy(ForecastTable.Column.TYPE)
                         .exec {
                             listForecasts.addAll(parseList(ForecastItem.ForecastItemParser))
                         }

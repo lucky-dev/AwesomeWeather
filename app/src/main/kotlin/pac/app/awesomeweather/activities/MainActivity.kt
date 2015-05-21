@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.support.v7.app.ActionBarActivity
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.content.LocalBroadcastManager
@@ -25,7 +24,6 @@ import pac.app.awesomeweather.YANDEX_WEATHER
 import pac.app.awesomeweather.fragments.CurrentWeatherFragment
 import pac.app.awesomeweather.fragments.ListWeatherFragment
 import pac.app.awesomeweather.utils.WeatherService
-import pac.app.awesomeweather.utils.isLoadingData
 import pac.app.awesomeweather.utils.isNeedToUpdate
 
 public class MainActivity : AppCompatActivity(), ListWeatherFragment.ListWeatherFragmentListener {
@@ -42,8 +40,8 @@ public class MainActivity : AppCompatActivity(), ListWeatherFragment.ListWeather
 
         val resourcesWeather = getResources().getStringArray(R.array.resources_weather)
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true)
-        getSupportActionBar().setHomeButtonEnabled(true)
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false)
+        getSupportActionBar().setHomeButtonEnabled(false)
         getSupportActionBar().setTitle(resourcesWeather.get(0))
 
         drawerLayout = find<DrawerLayout>(R.id.drawer_layout)
@@ -80,7 +78,7 @@ public class MainActivity : AppCompatActivity(), ListWeatherFragment.ListWeather
         intentFilter.addAction(WeatherService.ACTION_STOP_UPDATING)
         LocalBroadcastManager.getInstance(this).registerReceiver(apiResponseReceiver, intentFilter)
 
-        if ((isNeedToUpdate(this)) && (!isLoadingData(this))) {
+        if ((isNeedToUpdate(this)) && (!WeatherService.isRunning(this))) {
             WeatherService.downloadNews(this, YANDEX_WEATHER)
         }
     }
@@ -103,7 +101,7 @@ public class MainActivity : AppCompatActivity(), ListWeatherFragment.ListWeather
         val drawerOpen = drawerLayout?.isDrawerOpen(lvListResources) ?: false
         menu.findItem(R.id.action_refresh).setVisible(!drawerOpen)
 
-        setRefreshMenuItem(isLoadingData(this))
+        setRefreshMenuItem(WeatherService.isRunning(this))
 
         return super<AppCompatActivity>.onPrepareOptionsMenu(menu)
     }
@@ -114,7 +112,7 @@ public class MainActivity : AppCompatActivity(), ListWeatherFragment.ListWeather
         }
 
         if (item!!.getItemId() == R.id.action_refresh) {
-            if (!isLoadingData(this)) {
+            if (!WeatherService.isRunning(this)) {
                 WeatherService.downloadNews(this, YANDEX_WEATHER)
             }
         }

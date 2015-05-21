@@ -4,10 +4,10 @@ import org.jetbrains.anko.db.MapRowParser
 import pac.app.awesomeweather.utils.ForecastTable
 import java.util.Date
 
-val DAY_TYPE_MORNING = 1
-val DAY_TYPE_DAY = 2
-val DAY_TYPE_EVENING = 3
-val DAY_TYPE_NIGHT = 4
+val DAY_TYPE_NIGHT = 1
+val DAY_TYPE_MORNING = 2
+val DAY_TYPE_DAY = 3
+val DAY_TYPE_EVENING = 4
 
 data class ForecastItem(var id: Long = 0,
                         var type: Int = 0,
@@ -40,7 +40,7 @@ data class ForecastItem(var id: Long = 0,
     companion object ForecastItemParser: MapRowParser<ForecastItem> {
         override fun parseRow(columns: Map<String, Any>): ForecastItem {
             return ForecastItem(columns[ForecastTable.Column.ID] as? Long ?: 0,
-                                columns[ForecastTable.Column.TYPE] as? Int ?: 0,
+                                (columns[ForecastTable.Column.TYPE] as? Long)?.toInt() ?: 0,
                                 (columns[ForecastTable.Column.TEMPERATURE_FROM] as? Long)?.toInt() ?: Int.MIN_VALUE,
                                 (columns[ForecastTable.Column.TEMPERATURE_TO] as? Long)?.toInt() ?: Int.MIN_VALUE,
                                 (columns[ForecastTable.Column.TEMPERATURE] as? Long)?.toInt() ?: Int.MIN_VALUE,

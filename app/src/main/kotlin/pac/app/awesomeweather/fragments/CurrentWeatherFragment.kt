@@ -19,6 +19,7 @@ import org.jetbrains.anko.find
 import org.jetbrains.anko.longToast
 import org.jetbrains.anko.text
 import pac.app.awesomeweather.R
+import pac.app.awesomeweather.activities.MainActivity
 import pac.app.awesomeweather.utils.*
 
 public class CurrentWeatherFragment : Fragment() {
@@ -64,7 +65,7 @@ public class CurrentWeatherFragment : Fragment() {
         intentFilter.addAction(WeatherService.ACTION_STOP_UPDATING)
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(apiResponseReceiver, intentFilter)
 
-        if (isLoadingData(getActivity())) {
+        if (WeatherService.isRunning(getActivity())) {
             showAnimationLoadingData(true)
         } else {
             updateWeather()

@@ -51,7 +51,7 @@ public class ListWeatherFragment : ListFragment() {
         intentFilter.addAction(WeatherService.ACTION_STOP_UPDATING)
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(apiResponseReceiver, intentFilter)
 
-        if (isLoadingData(getActivity())) {
+        if (WeatherService.isRunning(getActivity())) {
             setListShownNoAnimation(false)
         } else {
             database.getDaysYandexForecast { result ->

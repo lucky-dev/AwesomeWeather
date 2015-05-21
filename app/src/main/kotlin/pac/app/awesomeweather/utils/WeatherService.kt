@@ -14,6 +14,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.UnknownHostException
 import org.jetbrains.anko.startService
+import pac.app.awesomeweather.PREFS_NAME
 
 public class WeatherService : IntentService("WeatherService") {
 
@@ -24,19 +25,28 @@ public class WeatherService : IntentService("WeatherService") {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        val weatherResource = intent?.getIntExtra(REQUEST_PARAM_WEATHER_RESOURCE, 0)
-
-        when (weatherResource) {
-            YANDEX_WEATHER -> handleYandexWeather()
-        }
-    }
-
-    private fun handleYandexWeather() {
-        setLoadingData(this, true)
+        setRunning(true)
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(Intent(ACTION_START_UPDATING))
 
-        val intent = Intent(ACTION_STOP_UPDATING)
+        val weatherResource = intent?.getIntExtra(REQUEST_PARAM_WEATHER_RESOURCE, 0)
+
+        var resultIntent = Intent()
+
+        try {
+            resultIntent = when (weatherResource) {
+                YANDEX_WEATHER -> handleYandexWeather()
+                else -> Intent(ACTION_STOP_UPDATING)
+            }
+        } finally {
+            setRunning(false)
+
+            LocalBroadcastManager.getInstance(this).sendBroadcast(resultIntent)
+        }
+    }
+
+    private fun handleYandexWeather(): Intent {
+        var intent = Intent(ACTION_STOP_UPDATING)
 
         try {
             downloadXmlData(URL_YANDEX_WEATHER) { statusCode, xmlData ->
@@ -58,11 +68,9 @@ public class WeatherService : IntentService("WeatherService") {
             }
         } catch (e: Exception) {
             intent.putExtra(RESPONSE_PARAM_CODE, RESPONSE_VALUE_CODE_ERROR)
-        } finally {
-            setLoadingData(this, false)
-
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
         }
+
+        return intent
     }
 
     private fun downloadXmlData(urlWeatherRes: String, callback: (Int, InputStream?) -> Unit) {
@@ -77,6 +85,13 @@ public class WeatherService : IntentService("WeatherService") {
         callback(connection?.getResponseCode() ?: -1, connection?.getInputStream())
     }
 
+    private fun setRunning(flag: Boolean) {
+        val settings = getSharedPreferences(PREFS_NAME, 0)
+        val editor = settings.edit()
+        editor.putBoolean("is_running_weather_service", flag)
+        editor.commit()
+    }
+
     companion object {
         val REQUEST_PARAM_WEATHER_RESOURCE = "weather_resource"
         val RESPONSE_PARAM_CODE = "response_code"
@@ -89,6 +104,12 @@ public class WeatherService : IntentService("WeatherService") {
 
         fun downloadNews(context: Context, weatherResource: Int) {
             context.startService<WeatherService>(REQUEST_PARAM_WEATHER_RESOURCE to weatherResource)
+        }
+
+        fun isRunning(context: Context): Boolean {
+            val settings = context.getSharedPreferences(PREFS_NAME, 0)
+
+            return settings.getBoolean("is_running_weather_service", false)
         }
     }
 
