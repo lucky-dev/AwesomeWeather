@@ -18,4 +18,8 @@
 
 -dontwarn org.w3c.dom.events.*
 -dontwarn com.squareup.picasso.OkHttpDownloader
+-dontwarn android.renderscript.RSSurfaceView
+-dontwarn android.renderscript.RenderScriptGL
+-dontwarn android.renderscript.RSTextureView
+-dontwarn android.webkit.*
 -keep public class * extends android.support.v4.app.Fragment
