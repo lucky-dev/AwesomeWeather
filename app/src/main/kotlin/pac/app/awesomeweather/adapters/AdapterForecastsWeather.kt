@@ -47,10 +47,10 @@ class AdapterForecastsWeather(var context: Context): BaseAdapter() {
 
             rootViewItem = context.layoutInflater.inflate(R.layout.forecast_weather_item, null)
 
-            holder?.ivWeatherIcon = rootViewItem?.find<ImageView>(R.id.iv_weather_icon)
-            holder?.tvTemperature = rootViewItem?.find<TextView>(R.id.tv_temperature)
-            holder?.tvWeatherType = rootViewItem?.find<TextView>(R.id.tv_weather_type)
-            holder?.tvPartDay = rootViewItem?.find<TextView>(R.id.tv_part_day)
+            holder.ivWeatherIcon = rootViewItem?.find<ImageView>(R.id.iv_weather_icon)
+            holder.tvTemperature = rootViewItem?.find<TextView>(R.id.tv_temperature)
+            holder.tvWeatherType = rootViewItem?.find<TextView>(R.id.tv_weather_type)
+            holder.tvPartDay = rootViewItem?.find<TextView>(R.id.tv_part_day)
 
             convertView?.setTag(holder)
         } else {

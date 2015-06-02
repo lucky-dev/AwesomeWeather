@@ -120,7 +120,7 @@ public class ListWeatherFragment : ListFragment() {
         }
     }
 
-    trait ListWeatherFragmentListener {
+    interface ListWeatherFragmentListener {
         fun clickOnDate(date: Long)
     }
 
