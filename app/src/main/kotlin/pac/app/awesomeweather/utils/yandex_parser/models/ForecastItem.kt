@@ -19,19 +19,15 @@ data class ForecastItem(var id: Long = 0,
                         var date: Date = Date()) {
     val strTemperature: String
         get() {
-            var temperature = Int.MIN_VALUE
+            var tmpr = Int.MIN_VALUE
             if ((temperatureFrom != Int.MIN_VALUE) && (temperatureTo != Int.MIN_VALUE)) {
-                temperature = (temperatureFrom + temperatureTo) / 2
+                tmpr = (temperatureFrom + temperatureTo) / 2
             } else if (temperature != Int.MIN_VALUE) {
-                temperature = temperature
+                tmpr = temperature
             }
 
-            if (temperature != Int.MIN_VALUE) {
-                if (temperature > 0) {
-                    return "+$temperature"
-                } else if (temperature < 0) {
-                    return "+$temperature"
-                }
+            if (tmpr != Int.MIN_VALUE) {
+                return if (tmpr > 0) "+$tmpr" else "-$tmpr"
             }
 
             return ""
